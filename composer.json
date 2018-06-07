@@ -1,0 +1,17 @@
+{
+  "name": "origindesign/ga_reporting",
+  "description": "Drupal 8 module to connect to Google Analytics API V4",
+  "type": "drupal-module",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Lindsay Wilson",
+      "email": "lwilson@origindesign.ca"
+    }
+  ],
+  "require": {
+    "php" : "~5.5|~7.0",
+    "google/apiclient": "^2.0.0@RC"
+  },
+  "minimum-stability": "dev"
+}
