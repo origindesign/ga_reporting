@@ -1,0 +1,3 @@
+services:
+  ga_reporting.api:
+    class: Drupal\ga_reporting\GoogleAnalyticsAPI

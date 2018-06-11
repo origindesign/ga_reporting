@@ -1,0 +1,4 @@
+administer Google API credentials:
+    title: 'Administer Google API credentials.'
+    description: 'Uploading credentials JSON file'
+    restrict access: true

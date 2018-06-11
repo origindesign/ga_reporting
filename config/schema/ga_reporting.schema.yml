@@ -1,0 +1,6 @@
+ga_reporting.credentials:
+  type: config_object
+  label: 'Google API Credentials'
+  mapping:
+    credentials_file:
+      type: string

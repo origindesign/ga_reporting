@@ -1,0 +1,7 @@
+ga_reporting.credentials:
+  path: '/admin/config/services/ga_credentials'
+  defaults:
+    _form: '\Drupal\ga_reporting\Form\CredentialsUpload'
+    _title: 'Google API Credentials'
+  requirements:
+    _permission: 'administer Google API credentials'

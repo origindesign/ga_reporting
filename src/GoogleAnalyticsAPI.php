@@ -7,7 +7,7 @@ namespace Drupal\ga_reporting;
 
 use Google_Client;
 use Google_Service_AnalyticsReporting;
-use Google_Auth_AssertionCredentials;
+//use Google_Auth_AssertionCredentials;
 use Google_Service_AnalyticsReporting_DateRange;
 use Google_Service_AnalyticsReporting_Metric;
 use Google_Service_AnalyticsReporting_Dimension;
@@ -18,23 +18,51 @@ use Google_Service_AnalyticsReporting_DimensionFilterClause;
 use Google_Service_AnalyticsReporting_OrderBy;
 
 
-class GoogleAnalyticsClass
-{
-    private $client;
-    private $viewId;
-    public function __construct($viewId)
-    {
-        $this->client = $this->initializeClient();
+
+class GoogleAnalyticsAPI{
+
+
+
+    protected $client;
+    protected $viewId;
+
+
+
+    public function initializeClient($viewId) {
+
         $this->viewId = $viewId;
+
+        // Get config
+        $config = \Drupal::config('ga_reporting.credentials');
+
+        // Get file
+        if($config->get('credentials_file') != ''){
+            $file = file_load($config->get('credentials_file'));
+            if(isset($file)){
+                $name = $file->getFileName();
+                $url = \Drupal::service('file_system')->realpath("private://").'/credentials/'.$name;
+            }
+        }
+
+        if(isset($url)){
+
+            $client = new Google_Client();
+            $client->setScopes('https://www.googleapis.com/auth/analytics.readonly');
+            $client->setApplicationName('Analytics Reporting');
+            $analyticsreporting = new Google_Service_AnalyticsReporting($client);
+            $client->setAuthConfig($url);
+            $this->client = $analyticsreporting;
+
+        }else{
+            drupal_set_message('You must upload a Google API credentials file at /admin/config/services/ga_credentials','warning');
+        }
+
+        return false;
+
     }
-    private function initializeClient() {
-        $client = new Google_Client();
-        $client->setScopes('https://www.googleapis.com/auth/analytics.readonly');
-        $client->setApplicationName('Analytics Reporting');
-        $analyticsreporting = new Google_Service_AnalyticsReporting($client);
-        $client->setAuthConfig('./credentials.json');
-        return $analyticsreporting;
-    }
+
+
+
     /**
      *
      * @param $pageUrl, $dateFrom, $dateTo
@@ -42,8 +70,8 @@ class GoogleAnalyticsClass
      * @param $dateTo
      * @return
      */
-    public function getPageMetrics($pageUrl, $dateFrom, $dateTo)
-    {
+
+    public function getPageMetrics($pageUrl, $dateFrom, $dateTo){
         $dateRange = new Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($dateFrom);
         $dateRange->setEndDate($dateTo);
@@ -89,6 +117,9 @@ class GoogleAnalyticsClass
         }
         return $resultSet;
     }
+
+
+
     /**
      *
      * @param $pageUrl, $dateFrom, $dateTo
@@ -96,6 +127,7 @@ class GoogleAnalyticsClass
      * @param $dateTo
      * @return
      */
+
     public function getPageViewsByTrafficSource($pageUrl, $dateFrom, $dateTo) {
         $dateRange = new Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($dateFrom);
@@ -113,10 +145,13 @@ class GoogleAnalyticsClass
         $filters = new Google_Service_AnalyticsReporting_DimensionFilter();
         $filters->setDimensionName('ga:pagepath');
         $filters->setExpressions([$pageUrl]);
+
         $filterClause = new Google_Service_AnalyticsReporting_DimensionFilterClause();
         $filterClause->setFilters([$filters]);
+
         $channelGroupingDimension = new Google_Service_AnalyticsReporting_Dimension();
         $channelGroupingDimension->setName('ga:channelGrouping');
+
         $res = $this->performRequest([
             'dateRange' => $dateRange,
             'metrics' => $metrics,
@@ -130,6 +165,9 @@ class GoogleAnalyticsClass
         }
         return $resultSet;
     }
+
+
+
     public function getPageViewsByCountry($pageUrl, $dateFrom, $dateTo) {
         $dateRange = new Google_Service_AnalyticsReporting_DateRange();
         $dateRange->setStartDate($dateFrom);
@@ -169,7 +207,10 @@ class GoogleAnalyticsClass
         }
         return $resultSet;
     }
-    private function performRequest($params) {
+
+
+
+    protected function performRequest($params) {
         $request = new Google_Service_AnalyticsReporting_ReportRequest();
         $request->setViewId($this->viewId);
         if (isset($params['dateRange'])) {
@@ -194,4 +235,7 @@ class GoogleAnalyticsClass
         $body->setReportRequests([$request]);
         return $this->client->reports->batchGet($body);
     }
+
+
+
 }
