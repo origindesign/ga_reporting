@@ -237,5 +237,111 @@ class GoogleAnalyticsAPI{
     }
 
 
+    /**
+     * @param $dateFrom
+     * @param $dateTo
+     * @param $metricKeys
+     * @param $dimensionKeys
+     * @param $dimensionFilterKeys
+     * @return mixed
+     */
+    public function getReport($dateFrom, $dateTo, $metricKeys, $dimensionKeys, $dimensionFilterKeys) {
+
+        // Create the DateRange object.
+        $dateRange = new Google_Service_AnalyticsReporting_DateRange();
+        $dateRange->setStartDate($dateFrom);
+        $dateRange->setEndDate($dateTo);
+
+        // Setup metrics
+        $metrics = [];
+        foreach($metricKeys as $metric => $alias) {
+            $reportingMetric = new Google_Service_AnalyticsReporting_Metric();
+            $reportingMetric->setExpression($metric);
+            $reportingMetric->setAlias($alias);
+            array_push($metrics, $reportingMetric);
+        }
+
+        // Setup Dimensions
+        $dimensions = [];
+        foreach($dimensionKeys as $name) {
+            $dimension = new Google_Service_AnalyticsReporting_Dimension();
+            $dimension->setName($name);
+            array_push($dimensions, $dimension);
+        }
+
+        // Setup dimension filters
+        $dimensionFilters = [];
+        foreach($dimensionFilterKeys as $name => $expression) {
+            $dimensionFilter = new Google_Service_AnalyticsReporting_DimensionFilter();
+            $dimensionFilter->setDimensionName($name);
+            $dimensionFilter->setOperator('EXACT');
+            $dimensionFilter->setExpressions(array($expression));
+            array_push($dimensionFilters, $dimensionFilter);
+        }
+
+        // Setup dimension filter clauses
+        $filterClauses = [];
+        foreach($dimensionFilters as $filter) {
+            $filterClause = new Google_Service_AnalyticsReporting_DimensionFilterClause();
+            $filterClause->setFilters($filter);
+            array_push($filterClauses, $filterClause);
+        }
+
+        // Create the ReportRequest object.
+        $request = new Google_Service_AnalyticsReporting_ReportRequest();
+        $request->setViewId($this->viewId);
+        $request->setDateRanges($dateRange);
+        $request->setDimensions($dimensions);
+        $request->setDimensionFilterClauses($filterClauses);
+        $request->setMetrics($metrics);
+
+        $body = new Google_Service_AnalyticsReporting_GetReportsRequest();
+        $body->setReportRequests( array( $request) );
+        return $this->client->reports->batchGet( $body );
+    }
+
+
+
+    /**
+     * @param $reports
+     * @return array
+     */
+    public function getResults($reports) {
+
+        $result = [];
+
+        for ( $reportIndex = 0; $reportIndex < count( $reports ); $reportIndex++ ) {
+            $report = $reports[ $reportIndex ];
+
+            $header = $report->getColumnHeader();
+            $dimensionHeaders = $header->getDimensions();
+            $metricHeaders = $header->getMetricHeader()->getMetricHeaderEntries();
+            $rows = $report->getData()->getRows();
+
+            for ( $rowIndex = 0; $rowIndex < count($rows); $rowIndex++) {
+                $row = $rows[ $rowIndex ];
+                $dimensions = $row->getDimensions();
+                $metrics = $row->getMetrics();
+
+                for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
+                    $result[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                }
+
+                for ($j = 0; $j < count($metrics); $j++) {
+                    $values = $metrics[$j]->getValues();
+                    for ($k = 0; $k < count($values); $k++) {
+                        $entry = $metricHeaders[$k];
+                        $result[$rowIndex][$entry->getName()] = $values[$k];
+                    }
+                }
+
+            }
+        }
+
+        return $result;
+
+    }
+
+
 
 }
