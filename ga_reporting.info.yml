@@ -3,4 +3,4 @@ type: module
 description: Module to connect to Google Analytics API V4
 package: Custom
 core: 8.x
-version: '8.x-1.0'
+version: '8.x-1.1'
