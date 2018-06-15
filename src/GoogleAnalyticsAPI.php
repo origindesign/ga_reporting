@@ -28,36 +28,16 @@ class GoogleAnalyticsAPI{
 
 
 
-    public function initializeClient($viewId) {
+    public function initializeClient($credentialsFilePath, $viewId) {
 
         $this->viewId = $viewId;
 
-        // Get config
-        $config = \Drupal::config('ga_reporting.credentials');
-
-        // Get file
-        if($config->get('credentials_file') != ''){
-            $file = file_load($config->get('credentials_file'));
-            if(isset($file)){
-                $name = $file->getFileName();
-                $url = \Drupal::service('file_system')->realpath("private://").'/credentials/'.$name;
-            }
-        }
-
-        if(isset($url)){
-
-            $client = new Google_Client();
-            $client->setScopes('https://www.googleapis.com/auth/analytics.readonly');
-            $client->setApplicationName('Analytics Reporting');
-            $analyticsreporting = new Google_Service_AnalyticsReporting($client);
-            $client->setAuthConfig($url);
-            $this->client = $analyticsreporting;
-
-        }else{
-            drupal_set_message('You must upload a Google API credentials file at /admin/config/services/ga_credentials','warning');
-        }
-
-        return false;
+        $client = new Google_Client();
+        $client->setScopes('https://www.googleapis.com/auth/analytics.readonly');
+        $client->setApplicationName('Analytics Reporting');
+        $analyticsreporting = new Google_Service_AnalyticsReporting($client);
+        $client->setAuthConfig($credentialsFilePath);
+        $this->client = $analyticsreporting;
 
     }
 
