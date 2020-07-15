@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "php" : "~5.5|~7.0",
+    "php" : "~7.0",
     "google/apiclient": "^2.0.0@RC"
   },
   "minimum-stability": "dev"

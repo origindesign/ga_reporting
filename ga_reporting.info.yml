@@ -2,5 +2,5 @@ name: Google Analytics Reporting
 type: module
 description: Module to connect to Google Analytics API V4
 package: Custom
-core: 8.x
-version: '8.x-1.2'
+core_version_requirement: ^8.8 || ^9
+version: '8.x-2.0'
