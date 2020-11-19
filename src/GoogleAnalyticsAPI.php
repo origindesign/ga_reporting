@@ -303,9 +303,11 @@ class GoogleAnalyticsAPI{
                 $dimensions = $row->getDimensions();
                 $metrics = $row->getMetrics();
 
+              if(is_array($dimensionHeaders) && is_array($dimensions)){
                 for ($i = 0; $i < count($dimensionHeaders) && $i < count($dimensions); $i++) {
-                    $result[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
+                  $result[$rowIndex][$dimensionHeaders[$i]] = $dimensions[$i];
                 }
+              }
 
                 for ($j = 0; $j < count($metrics); $j++) {
                     $values = $metrics[$j]->getValues();
