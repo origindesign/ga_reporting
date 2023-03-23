@@ -1,6 +1,6 @@
 {
   "name": "origindesign/ga_reporting",
-  "description": "Drupal 8 module to connect to Google Analytics API V4",
+  "description": "Drupal 9/10 module to connect to Google Analytics API V4",
   "type": "drupal-module",
   "license": "MIT",
   "authors": [
@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "php" : "~7.0",
+    "php" : "^8.0",
     "google/apiclient": "^2.8"
   },
   "minimum-stability": "dev"
